@@ -6,7 +6,7 @@ const dotenv = require("dotenv");
 dotenv.config({ path: "./config.env" });
 
 const AppError = require("./utils/appError");
-const itemsRoutes = require("./routes/itemRoutes");
+const APIRoutes = require("./routes/APIRoutes");
 const coursevilleRoutes = require("./routes/coursevilleRoutes");
 
 const app = express();
@@ -32,7 +32,7 @@ app.use(session(sessionOptions));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-app.use("/items", itemsRoutes);
+app.use("/api", APIRoutes);
 app.use("/courseville", coursevilleRoutes);
 app.get("/", (req, res) => {
   res.send("Congratulation. This server is successfully run.");

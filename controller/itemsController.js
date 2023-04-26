@@ -1,65 +1,152 @@
 const dotenv = require("dotenv");
 dotenv.config();
 const { v4: uuidv4 } = require("uuid");
-const { DynamoDBClient } = require("@aws-sdk/client-dynamodb");
-const {
-  PutCommand,
-  DeleteCommand,
-  ScanCommand,
-} = require("@aws-sdk/lib-dynamodb");
+const { DynamoDBClient, GetItemCommand, UpdateItemCommand } = require("@aws-sdk/client-dynamodb");
+const { PutCommand, DeleteCommand, ScanCommand, UpdateCommand } = require("@aws-sdk/lib-dynamodb");
+const docClient = new DynamoDBClient({ region: "us-east-1", removeUndefinedValues: true });
 
-const docClient = new DynamoDBClient({ regions: process.env.AWS_REGION });
-
-exports.getGroupMembers = async (req, res) => {
-  const params = {
-    TableName: process.env.aws_group_members_table_name,
-  };
-  try {
-    const data = await docClient.send(new ScanCommand(params));
-    res.send(data.Items);
-  } catch (err) {
-    console.error(err);
-    res.status(500).send(err);
-  }
-};
-
-// TODO #1.1: Get items from DynamoDB
-exports.getItems = async (req, res) => {
-<<<<<<< HEAD
-  // You should change the response below.
-=======
->>>>>>> acb40e4... feat: add getitems
-  const params = {
-    TableName: process.env.aws_items_table_name,
-  };
-  try {
-    const data = await docClient.send(new ScanCommand(params));
-    res.send(data.Items);
-  } catch (err) {
-    console.error(err);
-    res.status(500).send(err);
-  }
-};
-
-// TODO #1.2: Add an item to DynamoDB
-exports.addItem = async (req, res) => {
-  const item_id = uuidv4();
+// add new tasks
+exports.addTask = async (req, res) => {
+  const task_id = uuidv4();
   const created_date = Date.now();
-  const item = { item_id, ...req.body,  created_date };
-  console.log(item)
-  try{
-    const response = await docClient.send(new PutCommand(item));
-    res.send(response.item)
-  }catch(err){
-    res.status(500).send(err)
+  const owner = String(req.param("student_id"));
+
+  const task = {
+    task_id: { S: task_id },
+    task_name: { S: req.param("task_name") ?? "-" },
+    task_details: { S: req.param("task_details") ?? "-" },
+    created_date: { N: String(created_date) },
+    deadline: { N: req.param("deadline") ?? 0 },
+    color: { S: req.param("color") ?? "#FFFFFF" },
+  };
+
+  console.log(task);
+
+
+  const params = {
+    TableName: process.env.aws_students_table_name,
+    Key: {
+      "student_id": { S: owner }
+    },
+    UpdateExpression: "SET #tasks = list_append(#tasks, :task)",
+    ExpressionAttributeNames: { "#tasks": "tasks" },
+    ExpressionAttributeValues: {
+      ":task": {
+        L: [{
+          M: task
+        }]
+      }
+    }
+  };
+
+
+
+  const command = new UpdateItemCommand(params);
+
+  docClient.send(command)
+    .then(data => {
+      console.log("UpdateItem succeeded:", data);
+      res.send("update succeed!");
+    })
+    .catch(error => {
+      console.error(error);
+      res.status(500).send(error);
+    });
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// get students list
+exports.getAllStudents = async (req, res) => {
+  const params = {
+    TableName: process.env.aws_students_table_name,
+  };
+  try {
+    const data = await docClient.send(new ScanCommand(params));
+    res.send(data.Items);
+  } catch (err) {
     console.error(err);
+    res.status(500).send(err);
   }
 };
 
-// TODO #1.3: Delete an item from DynamDB
-exports.deleteItem = async (req, res) => {
-  const item_id = req.params.item_id;
+//get specific student
+exports.getStudent = async (req, res) => {
+  const params = {
+    TableName: process.env.aws_students_table_name,
+    Key: {
+      student_id: { S: req.param("student_id") },
+    },
+  };
+  try {
+    const data = await docClient.send(new GetItemCommand(params));
+    res.send(data.Item);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send(err);
+  }
+};
 
-  // You should change the response below.
-  res.send("This route should delete an item in DynamoDB with item_id.");
+
+// add new student
+exports.addStudent = async (req, res) => {
+  const item = {
+    student_id: req.param("student_id"),
+    name: req.param("name"),
+    tasks: [],
+  };
+  const params = {
+    TableName: process.env.aws_students_table_name,
+    Item: item,
+  };
+
+
+  try {
+    const data = await docClient.send(new PutCommand(params));
+    res.send("user added!");
+  } catch (err) {
+    console.error("error occured");
+    res.status(500).send(err);
+  }
+};
+
+
+// delete student
+exports.deleteStudent = async (req, res) => {
+  const student_id = req.param("student_id");
+  const params = {
+    TableName: process.env.aws_students_table_name,
+    Key: {
+      'student_id': student_id
+    }
+  };
+
+
+  try {
+    const data = await docClient.send(new DeleteCommand(params));
+    res.send("student deleted");
+  } catch (err) {
+    console.error(err);
+    res.status(500).send(err);
+  }
 };
