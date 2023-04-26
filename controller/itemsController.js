@@ -1,9 +1,12 @@
 const dotenv = require("dotenv");
 dotenv.config();
 const { v4: uuidv4 } = require("uuid");
+const { unmarshallItem } = require("@aws-sdk/util-dynamodb");
 const { DynamoDBClient, GetItemCommand, UpdateItemCommand } = require("@aws-sdk/client-dynamodb");
 const { PutCommand, DeleteCommand, ScanCommand, UpdateCommand } = require("@aws-sdk/lib-dynamodb");
-const docClient = new DynamoDBClient({ region: "us-east-1", removeUndefinedValues: true });
+const docClient = new DynamoDBClient({ region: "us-east-1", removeUndefinedValues: true, marshallOptions: { convertEmptyValues: true } });
+
+
 
 // add new tasks
 exports.addTask = async (req, res) => {
@@ -20,9 +23,6 @@ exports.addTask = async (req, res) => {
     color: { S: req.param("color") ?? "#FFFFFF" },
   };
 
-  console.log(task);
-
-
   const params = {
     TableName: process.env.aws_students_table_name,
     Key: {
@@ -38,8 +38,6 @@ exports.addTask = async (req, res) => {
       }
     }
   };
-
-
 
   const command = new UpdateItemCommand(params);
 
@@ -65,17 +63,6 @@ exports.addTask = async (req, res) => {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
 // get students list
 exports.getAllStudents = async (req, res) => {
   const params = {
@@ -89,7 +76,7 @@ exports.getAllStudents = async (req, res) => {
     res.status(500).send(err);
   }
 };
-
+const { marshall, unmarshall } = require("@aws-sdk/util-dynamodb");
 //get specific student
 exports.getStudent = async (req, res) => {
   const params = {
@@ -99,8 +86,10 @@ exports.getStudent = async (req, res) => {
     },
   };
   try {
-    const data = await docClient.send(new GetItemCommand(params));
-    res.send(data.Item);
+    const response = await docClient.send(new GetItemCommand(params));
+    const item = response.Item;
+    const unmarshalled = unmarshall(item);
+    res.send(unmarshalled);
   } catch (err) {
     console.error(err);
     res.status(500).send(err);
