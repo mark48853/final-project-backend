@@ -2,10 +2,10 @@ const dotenv = require("dotenv");
 dotenv.config();
 const { v4: uuidv4 } = require("uuid");
 const { unmarshallItem } = require("@aws-sdk/util-dynamodb");
+const { marshall, unmarshall } = require("@aws-sdk/util-dynamodb");
 const { DynamoDBClient, GetItemCommand, UpdateItemCommand } = require("@aws-sdk/client-dynamodb");
 const { PutCommand, DeleteCommand, ScanCommand, UpdateCommand } = require("@aws-sdk/lib-dynamodb");
 const docClient = new DynamoDBClient({ region: "us-east-1", removeUndefinedValues: true, marshallOptions: { convertEmptyValues: true } });
-
 
 
 // add new tasks
@@ -54,15 +54,6 @@ exports.addTask = async (req, res) => {
 
 
 
-
-
-
-
-
-
-
-
-
 // get students list
 exports.getAllStudents = async (req, res) => {
   const params = {
@@ -76,7 +67,7 @@ exports.getAllStudents = async (req, res) => {
     res.status(500).send(err);
   }
 };
-const { marshall, unmarshall } = require("@aws-sdk/util-dynamodb");
+
 //get specific student
 exports.getStudent = async (req, res) => {
   const params = {
