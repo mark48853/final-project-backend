@@ -12,5 +12,6 @@ router.delete("/delete_student", itemsController.deleteStudent);
 
 // router.get("/get_tasks", itemsController.getTasks);
 router.post("/add_task", itemsController.addTask);
+router.delete("/delete_task", itemsController.deleteTask);
 
 module.exports = router;

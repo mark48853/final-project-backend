@@ -17,6 +17,7 @@ exports.addTask = async (req, res) => {
   const task = {
     task_id: { S: task_id },
     task_name: { S: req.param("task_name") ?? "-" },
+    task_subject: { S: req.param("task_subject") ?? "-" },
     task_details: { S: req.param("task_details") ?? "-" },
     created_date: { N: String(created_date) },
     deadline: { N: req.param("deadline") ?? 0 },
@@ -44,7 +45,7 @@ exports.addTask = async (req, res) => {
   docClient.send(command)
     .then(data => {
       console.log("UpdateItem succeeded:", data);
-      res.send("update succeed!");
+      res.send("update succeed!, here is the task_id: " + task_id);
     })
     .catch(error => {
       console.error(error);
@@ -53,6 +54,57 @@ exports.addTask = async (req, res) => {
 };
 
 
+// delete task of a specific student
+exports.deleteTask = async (req, res) => {
+  const task_id = String(req.param("task_id"));
+  const owner = String(req.param("student_id"));
+
+  const getItemParams = {
+    TableName: process.env.aws_students_table_name,
+    Key: {
+      "student_id": { S: owner }
+    }
+  };
+
+  const getItemCommand = new GetItemCommand(getItemParams);
+
+  try {
+    const { Item: student } = await docClient.send(getItemCommand);
+
+    if (!student) {
+      res.status(404).send("Student not found.");
+      return;
+    }
+
+    const tasks = student.tasks?.L || [];
+    const taskIndex = tasks.findIndex(task => task.M.task_id.S === task_id);
+
+    if (taskIndex === -1) {
+      res.status(404).send("Task not found.");
+      return;
+    }
+
+    const deleteParams = {
+      TableName: process.env.aws_students_table_name,
+      Key: {
+        "student_id": { S: owner }
+      },
+      UpdateExpression: `REMOVE #tasks[${taskIndex}]`,
+      ExpressionAttributeNames: { "#tasks": "tasks" },
+      ReturnValues: "ALL_NEW"
+    };
+
+    const deleteCommand = new UpdateItemCommand(deleteParams);
+
+    const { Attributes: updatedStudent } = await docClient.send(deleteCommand);
+
+    res.send("task deleted");
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).send(error);
+  }
+};
 
 // get students list
 exports.getAllStudents = async (req, res) => {
