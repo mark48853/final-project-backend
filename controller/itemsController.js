@@ -144,7 +144,7 @@ exports.getStudent = async (req, res) => {
 exports.addStudent = async (req, res) => {
   const item = {
     student_id: req.param("student_id"),
-    name: req.param("name"),
+    name: req.param("name") ?? "-",
     tasks: [],
   };
   const params = {
