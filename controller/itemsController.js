@@ -45,7 +45,7 @@ exports.addTask = async (req, res) => {
   docClient.send(command)
     .then(data => {
       console.log("UpdateItem succeeded:", data);
-      res.send("update succeed!, here is the task_id: " + task_id);
+      res.send(task_id);
     })
     .catch(error => {
       console.error(error);
@@ -150,6 +150,7 @@ exports.addStudent = async (req, res) => {
   const params = {
     TableName: process.env.aws_students_table_name,
     Item: item,
+    ConditionExpression: "attribute_not_exists(student_id)",
   };
 
 
