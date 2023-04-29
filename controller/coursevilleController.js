@@ -139,13 +139,15 @@ exports.getUserInfo = (req, res) => {
 
 exports.getCourses = (req, res) => {
   try {
+    // console.log(req.session);
+    // console.log(req.session.token);
     const profileOptions = {
       headers: {
         Authorization: `Bearer ${req.session.token.access_token}`,
       },
     };
     const profileReq = https.request(
-      "https://www.mycourseville.com/api/v1/public/get/user/courses",
+      "https://www.mycourseville.com/api/v1/public/get/user/courses?detail=1",
       profileOptions,
       (profileRes) => {
         let profileData = "";
