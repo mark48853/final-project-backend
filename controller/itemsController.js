@@ -19,7 +19,7 @@ exports.addTask = async (req, res) => {
     task_name: { S: req.param("task_name") ?? "-" },
     task_subject: { S: req.param("task_subject") ?? "-" },
     task_details: { S: req.param("task_details") ?? "-" },
-    created_date: { N: String(created_date) },
+    created_date: { S: String(created_date) },
     deadline: { N: req.param("deadline") ?? 0 },
     color: { S: req.param("color") ?? "#FFFFFF" },
   };
