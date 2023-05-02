@@ -132,7 +132,9 @@ exports.getUserInfo = (req, res) => {
     });
     profileReq.end();
   } catch (error) {
-    res.status(500).send("error, please login.");
+    const err = JSON.parse({error: "error, please login."});
+    res.send(err);
+    res.end();
     console.log("Please logout, then login again.");
   }
 };
