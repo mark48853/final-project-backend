@@ -132,7 +132,7 @@ exports.getUserInfo = (req, res) => {
     });
     profileReq.end();
   } catch (error) {
-    console.log(error);
+    res.error(500).send("error");
     console.log("Please logout, then login again.");
   }
 };
