@@ -132,8 +132,7 @@ exports.getUserInfo = (req, res) => {
     });
     profileReq.end();
   } catch (error) {
-    const err = JSON.parse({error: "error, please login."});
-    res.send(err);
+    res.json({error: "error, please login."});
     res.end();
     console.log("Please logout, then login again.");
   }
