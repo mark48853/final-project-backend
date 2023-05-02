@@ -158,8 +158,8 @@ exports.addStudent = async (req, res) => {
     const data = await docClient.send(new PutCommand(params));
     res.send("user added!");
   } catch (err) {
-    console.error("error occured");
-    res.status(500).send(err);
+    console.error("user may already exist");
+    res.status(200).send("user already exist, nothing changed.");
   }
 };
 
