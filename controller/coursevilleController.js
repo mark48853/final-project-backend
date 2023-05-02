@@ -127,6 +127,7 @@ exports.getUserInfo = (req, res) => {
       }
     );
     profileReq.on("error", (err) => {
+      res.error(500).send("error");
       console.error(err);
     });
     profileReq.end();
