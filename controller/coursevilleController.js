@@ -127,12 +127,12 @@ exports.getUserInfo = (req, res) => {
       }
     );
     profileReq.on("error", (err) => {
-      res.error(500).send("error");
+      res.status(500).send("error");
       console.error(err);
     });
     profileReq.end();
   } catch (error) {
-    res.error(500).send("error");
+    res.status(500).send("error");
     console.log("Please logout, then login again.");
   }
 };
