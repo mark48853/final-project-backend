@@ -71,7 +71,7 @@ exports.accessToken = (req, res) => {
   }
 };
 
-// Example: Send "GET" request to CV endpoint to get user profile information
+
 exports.getProfileInformation = (req, res) => {
   try {
     const profileOptions = {
@@ -127,12 +127,13 @@ exports.getUserInfo = (req, res) => {
       }
     );
     profileReq.on("error", (err) => {
-      res.error(500).send("error");
+      res.status(500).send("error");
       console.error(err);
     });
     profileReq.end();
   } catch (error) {
-    console.log(error);
+    res.status(500).send("error, pls login");
+    res.end();
     console.log("Please logout, then login again.");
   }
 };
@@ -140,8 +141,6 @@ exports.getUserInfo = (req, res) => {
 
 exports.getCourses = (req, res) => {
   try {
-    // console.log(req.session);
-    // console.log(req.session.token);
     const profileOptions = {
       headers: {
         Authorization: `Bearer ${req.session.token.access_token}`,
@@ -172,12 +171,10 @@ exports.getCourses = (req, res) => {
   }
 };
 
-// TODO #3.4: Send "GET" request to CV endpoint to get all course assignments based on cv_cid
 
 exports.getCourseAssignments = (req, res) => {
   const cv_cid = req.params.cv_cid;
   const url = `https://www.mycourseville.com/api/v1/public/get/course/assignments?cv_cid=${cv_cid}`;
-  // You should change the response below.
   const courseReq = https.request(
     url,
     {
@@ -202,12 +199,10 @@ exports.getCourseAssignments = (req, res) => {
   courseReq.end();
 };
 
-// Outstanding #2
+
 exports.getAssignmentDetail = (req, res) => {
   const itemid = req.params.item_id;
-
   const url = `https://www.mycourseville.com/api/v1/public/get/item/assignment?item_id=${itemid}`;
-  // You should change the response below.
   const courseReq = https.request(
     url,
     {
